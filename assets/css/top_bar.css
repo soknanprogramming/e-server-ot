@@ -1,0 +1,112 @@
+/* Navbar Base */
+.navbar {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 50;
+}
+
+/* Container */
+.navbar-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Flex Layout */
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  transition: 0.3s;
+}
+.logo:hover .logo-text {
+  color: #2563eb; /* blue-600 */
+}
+.logo-image {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+}
+.logo:hover .logo-image {
+  transform: scale(1.1);
+}
+.logo-text {
+  font-weight: bold;
+  font-size: 1.25rem;
+  margin-left: 8px;
+  color: #333;
+}
+
+/* Right Section */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* User Info */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.user-avatar {
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  background: #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #4b5563;
+}
+.username {
+  color: #374151;
+  font-weight: 500;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.3s;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+.btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+/* Button Colors */
+.btn-blue {
+  background: linear-gradient(to right, #3b82f6, #1e40af);
+}
+.btn-amber {
+  background: linear-gradient(to right, #fbbf24, #d97706);
+}
+.btn-red {
+  background: linear-gradient(to right, #ef4444, #dc2626);
+}
+.btn-green {
+  background: linear-gradient(to right, #4ade80, #16a34a);
+}

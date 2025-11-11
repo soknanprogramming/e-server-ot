@@ -1,10 +1,78 @@
+<?php 
+require_once '../config/check_login.php'; 
+require_once '../repos/CategoriesOrders.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="utils/main.css">
+  <style>
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 16px;
+    }
 
+    .container h2 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 24px;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .category-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .category-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .category-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .category-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .category-card img {
+      width: 96px;
+      height: 96px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .category-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      color: #333;
+    }
+
+  </style>
   <title>Document</title>
 </head>
 <body>
@@ -94,38 +162,25 @@
 
 
   <div class="main-content">
-    <h1>Welcome!</h1>
-    <p>This is your page content.</p>
-    aldfja; 
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
+    <?php
+    // Fake categories data since the table is not created yet
+    $categories = (new CategoriesOrders)->getCategoriesOrders();
+    ?>
+
+    <div class="container">
+      <h2>Choose Categories</h2>
+
+      <div class="category-grid">
+        <?php foreach ($categories as $category): ?>
+          <a href="services/order.php?id=<?= htmlspecialchars($category['id']) ?>" class="category-card">
+            <img src="<?= htmlspecialchars('../../../assets/images/'.$category['imageURL']) ?>" 
+                alt="<?= htmlspecialchars($category['name']) ?>">
+            <h3><?= htmlspecialchars($category['name']) ?></h3>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+
   </div>
 
   <script src="utils/main.js"></script>
