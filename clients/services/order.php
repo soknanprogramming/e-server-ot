@@ -326,64 +326,29 @@ if ($categoryId > 0) {
                 <label for="imageInput" class="form-label mb-2">
                     Upload Images (1–5, can add multiple times)
                 </label>
-                <input 
-                    type="file" 
-                    id="imageInput" 
-                    name="images[]"
-                    accept="image/*" 
-                    multiple 
-                    class="file-input"
-                    onchange="addImages(event)"
-                >
-                <p class="file-note">You can upload up to 5 images in total.</p>
+                <input type="file" id="images" name="images[]" class="file-input" multiple accept="image/*">
+                <div id="preview"></div>
 
-                <div id="preview"></div> </div>
+<script>
+document.getElementById('images').addEventListener('change', function (event) {
+    const preview = document.getElementById('preview');
+    preview.innerHTML = '';
 
-            <script>
-            let selectedFiles = []; // store chosen images
+    Array.from(event.target.files).forEach((file) => {
+        const reader = new FileReader();
 
-            function addImages(event) {
-                const files = Array.from(event.target.files);
-                for (let file of files) {
-                    if (selectedFiles.length >= 5) {
-                        alert("You can only upload up to 5 images.");
-                        break;
-                    }
-                    if (!file.type.startsWith("image/")) continue;
-                    selectedFiles.push(file);
-                    showPreview(file);
-                }
-            }
+        reader.onload = function (e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.classList.add('preview-image');
+            preview.appendChild(img);
+        };
 
+        reader.readAsDataURL(file);
+    });
+});
+</script>
 
-            function showPreview(file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const div = document.createElement("div");
-                    div.classList.add("preview-item"); // Replaced relative, w-full, h-28
-
-                    const img = document.createElement("img");
-                    img.src = e.target.result;
-                    img.classList.add("preview-image"); // Replaced w-full, h-full, object-cover, rounded-md, shadow
-
-                    const btn = document.createElement("button");
-                    btn.innerHTML = "✕";
-                    btn.type = "button";
-                    btn.classList.add("remove-btn"); // Replaced absolute, top-1, right-1, bg-red-600, text-white, text-xs, rounded-full, px-1, py-0.5, hover:bg-red-700
-
-                    btn.onclick = function() {
-                        const index = Array.from(div.parentNode.children).indexOf(div);
-                        selectedFiles.splice(index, 1);
-                        div.remove();
-                    };
-
-                    div.appendChild(img);
-                    div.appendChild(btn);
-                    document.getElementById("preview").appendChild(div);
-                };
-                reader.readAsDataURL(file);
-            }
-            </script>
 
             <div>
                 <label class="form-label mb-2">Location</label>
