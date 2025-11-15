@@ -1,88 +1,62 @@
 <?php
-require_once '../config/check_login.php';
-require_once '../repos/Orders.php';
+require_once '../../config/check_login.php';
+require_once '../../repos/Orders.php';
+
+$orderId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$userId = $_SESSION['user_id'];
+
+if ($orderId <= 0) {
+    header('Location: /clients/ordered.php');
+    exit();
+}
 
 $orderRepo = new Orders();
-$orders = $orderRepo->getOrdersByUserId($_SESSION['user_id']);
+$order = $orderRepo->getOrderDetailById($orderId, $userId);
 
-function getStatusClass($isHelp) {
-    return $isHelp ? 'status-completed' : 'status-pending';
+if (!$order) {
+    // Order not found or doesn't belong to the user
+    header('Location: /clients/ordered.php');
+    exit();
 }
+
+$images = array_filter([
+    $order['image1'], $order['image2'], $order['image3'], $order['image4'], $order['image5']
+]);
+
+$location = implode(', ', array_filter([$order['village'], $order['commune'], $order['district'], $order['province']]));
 
 function getStatusText($isHelp) {
     return $isHelp ? 'Completed' : 'Pending';
-}
-
-$message = null;
-if (isset($_SESSION['message'])) {
-    $message = $_SESSION['message'];
-    unset($_SESSION['message']);
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="utils/main.css">
-  <style>
-    .main-content {
-        padding: 20px;
-    }
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    .container h1 {
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-    }
-    .order-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
-    }
-    .order-card {
-        background-color: white;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }
-    .order-card-image {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-        background-color: #f3f4f6;
-    }
-    .order-card-content {
-        padding: 1rem;
-    }
-    .order-card-content h2 {
-        font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;
-    }
-    .order-card-content p {
-        font-size: 0.875rem; color: #4b5563; margin-bottom: 0.25rem;
-    }
-    .status { font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; display: inline-block; margin-top: 0.75rem; }
-    .status-pending { background-color: #fef3c7; color: #92400e; }
-    .status-completed { background-color: #d1fae5; color: #065f46; }
-    .order-card-actions { display: flex; gap: 0.5rem; padding: 0 1rem 1rem; margin-top: auto; }
-    .btn { padding: 0.5rem 1rem; border-radius: 0.375rem; text-decoration: none; font-weight: 600; font-size: 0.875rem; text-align: center; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
-    .btn-details { background-color: #3b82f6; color: white; flex-grow: 1; }
-    .btn-details:hover { background-color: #2563eb; }
-    .btn-delete { background-color: transparent; color: #ef4444; border-color: #ef4444; }
-    .btn-delete:hover { background-color: #ef4444; color: white; }
-    .message { padding: 1rem; margin-bottom: 1.5rem; border-radius: 0.5rem; font-weight: 500; }
-    .message.success { background-color: #d1fae5; color: #065f46; }
-    .message.error { background-color: #fee2e2; color: #991b1b; }
-  </style>
-  <title>Document</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="../utils/main.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        .container { max-width: 900px; margin: 0 auto; }
+        .detail-card { background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-top: 2rem; overflow: hidden; }
+        .detail-header { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; }
+        .detail-header h1 { font-size: 1.75rem; font-weight: 600; margin: 0; }
+        .detail-header p { color: #6b7280; margin: 0.25rem 0 0; }
+        .detail-body { padding: 1.5rem; }
+        .detail-section { margin-bottom: 1.5rem; }
+        .detail-section h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; }
+        .detail-item { display: flex; margin-bottom: 0.75rem; }
+        .detail-item strong { color: #374151; width: 120px; flex-shrink: 0; }
+        .detail-item span { color: #4b5563; }
+        .image-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+        .image-gallery img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        #map { height: 300px; width: 100%; border-radius: 8px; margin-top: 1rem; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: #2563eb; text-decoration: none; font-weight: 500; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-
 
 <aside class="sidebar">
   <ul>
@@ -163,48 +137,73 @@ if (isset($_SESSION['message'])) {
   </ul>
 </aside>
 
-<!-- Main Content -->
 <div class="main-content">
     <div class="container">
-        <h1>My Orders</h1>
+        <a href="/clients/ordered.php" class="back-link">&larr; Back to My Orders</a>
 
-        <?php if ($message): ?>
-            <div class="message <?= htmlspecialchars($message['type']) ?>">
-                <?= htmlspecialchars($message['text']) ?>
+        <div class="detail-card">
+            <div class="detail-header">
+                <h1><?= htmlspecialchars($order['category_name']) ?> - <?= htmlspecialchars($order['problem_name']) ?></h1>
+                <p>Ordered on: <?= date('F j, Y, g:i a', strtotime($order['created_at'])) ?></p>
             </div>
-        <?php endif; ?>
-
-        <?php if (empty($orders)): ?>
-            <p>You have not placed any orders yet.</p>
-        <?php else: ?>
-            <div class="order-grid">
-                <?php foreach ($orders as $order): ?>
-                    <div class="order-card">
-                        <img src="<?= htmlspecialchars($order['image1'] ? '/assets/images/' . $order['image1'] : '/assets/images/placeholder.png') ?>" 
-                             alt="Order Image" class="order-card-image">
-                        <div class="order-card-content">
-                            <h2><?= htmlspecialchars($order['category_name']) ?> - <?= htmlspecialchars($order['problem_name']) ?></h2>
-                            <p><strong>Description:</strong> <?= htmlspecialchars($order['Problem']) ?></p>
-                            <p><strong>Location:</strong> <?= htmlspecialchars(implode(', ', array_filter([$order['village'], $order['commune'], $order['district'], $order['province']]))) ?></p>
-                            <p><strong>Ordered on:</strong> <?= date('d M Y, H:i', strtotime($order['created_at'])) ?></p>
-                            <span class="status <?= getStatusClass($order['IsHelp']) ?>">
-                                <?= getStatusText($order['IsHelp']) ?>
-                            </span>
-                        </div>
-                        <div class="order-card-actions">
-                            <a href="services/order_detail.php?id=<?= $order['id'] ?>" class="btn btn-details">View Details</a>
-                            <form action="services/delete_order.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this order? This action cannot be undone.');">
-                                <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                <button type="submit" class="btn btn-delete">Delete</button>
-                            </form>
-                        </div>
+            <div class="detail-body">
+                <div class="detail-section">
+                    <h2>Order Information</h2>
+                    <div class="detail-item">
+                        <strong>Status:</strong>
+                        <span><?= getStatusText($order['IsHelp']) ?></span>
                     </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
-  </div>
+                    <div class="detail-item">
+                        <strong>Description:</strong>
+                        <span><?= nl2br(htmlspecialchars($order['Problem'])) ?></span>
+                    </div>
+                </div>
 
-<script src="utils/main.js"></script>
+                <?php if (!empty($images)): ?>
+                <div class="detail-section">
+                    <h2>Uploaded Images</h2>
+                    <div class="image-gallery">
+                        <?php foreach ($images as $img): ?>
+                            <img src="/assets/images/<?= htmlspecialchars($img) ?>" alt="Order Image">
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <div class="detail-section">
+                    <h2>Location</h2>
+                    <div class="detail-item">
+                        <strong>Address:</strong>
+                        <span><?= htmlspecialchars($location) ?></span>
+                    </div>
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const lat = <?= json_encode($order['latitude']) ?>;
+        const lng = <?= json_encode($order['longitude']) ?>;
+
+        if (lat && lng) {
+            const map = L.map('map').setView([lat, lng], 16);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup('The location of the service request.')
+                .openPopup();
+        } else {
+            document.getElementById('map').innerHTML = '<p>Location coordinates not available.</p>';
+        }
+    });
+</script>
+<script src="../utils/main.js"></script>
 </body>
 </html>

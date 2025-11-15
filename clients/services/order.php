@@ -212,6 +212,12 @@ if ($categoryId > 0) {
     .submit-btn:hover {
         background-color: #1d4ed8; /* hover:bg-blue-700 equivalent */
     }
+
+    .back-link {
+        display: inline-block; margin-bottom: 1rem; color: #2563eb; text-decoration: none; font-weight: 500;
+    }
+    .back-link:hover { text-decoration: underline; }
+
   </style>
 </head>
 <body>
@@ -306,7 +312,10 @@ if ($categoryId > 0) {
     ?>
 
     <div class="container">
-      <div class="form-card"> <form action="submit_order.php" id="uploadForm" method="POST" enctype="multipart/form-data" class="form-space-y"> <div>
+        <a href="/clients/services.php" class="back-link">&larr; Back to Choose Categories</a>
+      <div class="form-card">
+          <form action="submit_order.php" id="uploadForm" method="POST" enctype="multipart/form-data" class="form-space-y">
+              <div>
                 <label for="username" class="form-label">Username</label> <input type="text" id="username" name="username" required class="form-input"> </div>
             <div>
                 <label for="phone" class="form-label">Phone Number</label>
