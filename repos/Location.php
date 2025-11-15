@@ -14,19 +14,19 @@ class Location {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getDistricts($province_id) {
+    public function getDistrictsByProvinceId($province_id) {
         $stmt = $this->pdo->prepare("SELECT id, name FROM districts WHERE province_id = ? ORDER BY name ASC");
         $stmt->execute([$province_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getCommunes($district_id) {
+    public function getCommunesByDistrictId($district_id) {
         $stmt = $this->pdo->prepare("SELECT id, name FROM communes WHERE district_id = ? ORDER BY name ASC");
         $stmt->execute([$district_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getVillages($commune_id) {
+    public function getVillagesByCommuneId($commune_id) {
         $stmt = $this->pdo->prepare("SELECT id, name FROM villages WHERE commune_id = ? ORDER BY name ASC");
         $stmt->execute([$commune_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -5,7 +5,7 @@ require_once '../../repos/CategoriesOrders.php';
 
 
 // Get category ID from query string
-$categoryId = isset($_GET['id_categories']) ? $_GET['id_categories'] : 0;
+$categoryId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $problems = [];
 if ($categoryId > 0) {
     $problemRepo = new CategoriesProblem();
@@ -194,8 +194,10 @@ if ($categoryId > 0) {
     /* Submit Button */
     .submit-btn {
         width: 100%; /* w-full equivalent */
-        padding-top: 0.5rem; /* py-2 equivalent */
-        padding-bottom: 0.5rem; /* py-2 equivalent */
+        padding-top: 2px; /* py-2 equivalent */
+        padding-bottom: 2px; /* py-2 equivalent */
+        height: 30px;
+        margin-top: 5px;
         padding-left: 1rem; /* px-4 equivalent */
         padding-right: 1rem; /* px-4 equivalent */
         background-color: #2563eb; /* bg-blue-600 equivalent */
@@ -389,7 +391,7 @@ document.getElementById('images').addEventListener('change', function (event) {
                 </div>
                 <script>
                 document.getElementById("province").addEventListener("change", function() {
-                    fetch("../../../api/get_districts.php?province_id=" + this.value)
+                    fetch("../api/get_districts.php?province_id=" + this.value)
                         .then(res => res.json())
                         .then(data => {
                             // console.log(data);
@@ -404,7 +406,7 @@ document.getElementById('images').addEventListener('change', function (event) {
                 });
 
                 document.getElementById("district").addEventListener("change", function() {
-                    fetch("../../../api/get_communes.php?district_id=" + this.value)
+                    fetch("../api/get_communes.php?district_id=" + this.value)
                         .then(res => res.json())
                         .then(data => {
                             let communeSelect = document.getElementById("commune");
@@ -417,7 +419,7 @@ document.getElementById('images').addEventListener('change', function (event) {
                 });
 
                 document.getElementById("commune").addEventListener("change", function() {
-                    fetch("../../../api/get_villages.php?commune_id=" + this.value)
+                    fetch("../api/get_villages.php?commune_id=" + this.value)
                         .then(res => res.json())
                         .then(data => {
                             let villageSelect = document.getElementById("village");
@@ -459,7 +461,7 @@ document.getElementById('images').addEventListener('change', function (event) {
 
                 // Place marker
                 marker = L.marker([lat, lng]).addTo(map)
-                    .bindPopup("You are here").openPopup();
+                    .bindPopup("Choose location").openPopup();
 
                 // Save to hidden fields
                 document.getElementById('latitude').value = lat;
