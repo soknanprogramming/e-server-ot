@@ -1,3 +1,16 @@
+<?php
+require_once '../config/check_login.php';
+require_once '../repos/UserProfile.php';
+require_once '../repos/Orders.php';
+
+$profileRepo = new UserProfile();
+$orderRepo = new Orders();
+
+$user = $profileRepo->getProfileByUserId($_SESSION['user_id']);
+$recentOrders = $orderRepo->getOrdersByUserId($_SESSION['user_id']); // Fetches all, we'll limit in the loop
+
+$username = $user['username'] ?? 'User';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,41 +94,67 @@
 <!-- Main Content -->
 <div id="sidebar-container"></div>
 
+<div class="main-content">
+    <style>
+        .dashboard-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
+        .welcome-header { margin-bottom: 2rem; }
+        .welcome-header h1 { font-size: 2rem; font-weight: 700; }
+        .welcome-header p { font-size: 1rem; color: #4b5563; }
+        .quick-actions { display: flex; gap: 1rem; margin-bottom: 2.5rem; }
+        .action-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; transition: all 0.2s; }
+        .btn-primary { background-color: #3b82f6; color: white; }
+        .btn-primary:hover { background-color: #2563eb; }
+        .btn-secondary { background-color: #e5e7eb; color: #1f2937; }
+        .btn-secondary:hover { background-color: #d1d5db; }
+        .section-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; }
+        .order-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 1rem; }
+        .order-item { background-color: white; border-radius: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center; padding: 1rem; transition: box-shadow 0.2s; }
+        .order-item:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .order-info { flex-grow: 1; }
+        .order-info h3 { font-size: 1.125rem; font-weight: 600; margin: 0 0 0.25rem; }
+        .order-info p { font-size: 0.875rem; color: #6b7280; margin: 0; }
+        .order-status { font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; }
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-completed { background-color: #d1fae5; color: #065f46; }
+        .no-orders { background-color: #f9fafb; padding: 2rem; text-align: center; border-radius: 0.5rem; border: 2px dashed #e5e7eb; }
+    </style>
 
-  <div class="main-content">
-    <h1>Welcome!</h1>
-    <p>This is your page content.</p>
-    aldfja; 
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-  </div>
+    <div class="dashboard-container">
+        <div class="welcome-header">
+            <h1>Welcome back, <?= htmlspecialchars($username) ?>!</h1>
+            <p>Here's a quick overview of your account.</p>
+        </div>
+
+        <div class="quick-actions">
+            <a href="/clients/services.php" class="action-btn btn-primary">Order a New Service</a>
+            <a href="/clients/ordered.php" class="action-btn btn-secondary">View All My Orders</a>
+        </div>
+
+        <h2 class="section-title">Recent Orders</h2>
+
+        <?php if (empty($recentOrders)): ?>
+            <div class="no-orders">
+                <p>You haven't placed any orders yet. Get started by ordering a service!</p>
+            </div>
+        <?php else: ?>
+            <ul class="order-list">
+                <?php foreach (array_slice($recentOrders, 0, 3) as $order): ?>
+                    <li>
+                        <a href="/clients/services/order_detail.php?id=<?= $order['id'] ?>" class="order-item" style="text-decoration: none; color: inherit;">
+                            <div class="order-info">
+                                <h3><?= htmlspecialchars($order['category_name']) ?> - <?= htmlspecialchars($order['problem_name']) ?></h3>
+                                <p>Ordered on: <?= date('d M Y', strtotime($order['created_at'])) ?></p>
+                            </div>
+                            <span class="order-status <?= $order['IsHelp'] ? 'status-completed' : 'status-pending' ?>">
+                                <?= $order['IsHelp'] ? 'Completed' : 'Pending' ?>
+                            </span>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+    </div>
+</div>
 
   <script src="utils/main.js"></script>
 </body>

@@ -1,3 +1,6 @@
+<?php
+require_once '../config/check_login.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="utils/main.css">
 
-  <title>Document</title>
+  <title>About Us</title>
 </head>
 <body>
 
@@ -82,40 +85,56 @@
 <div id="sidebar-container"></div>
 
 
-  <div class="main-content">
-    <h1>Welcome!</h1>
-    <p>This is your page content.</p>
-    aldfja; 
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-  </div>
+<div class="main-content">
+    <style>
+        .about-container { max-width: 900px; margin: 2rem auto; padding: 2rem; background-color: #fff; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .about-container h1 { font-size: 2.5rem; font-weight: 800; text-align: center; margin-bottom: 1rem; color: #1f2937; }
+        .about-container .tagline { text-align: center; font-size: 1.25rem; color: #4b5563; margin-bottom: 3rem; }
+        .section { margin-bottom: 2.5rem; }
+        .section h2 { font-size: 1.75rem; font-weight: 700; color: #111827; border-bottom: 2px solid #3b82f6; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+        .section p { font-size: 1rem; line-height: 1.6; color: #374151; margin-bottom: 1rem; }
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; text-align: center; }
+        .team-member img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin: 0 auto 1rem; border: 3px solid #e5e7eb; }
+        .team-member h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .team-member p { font-size: 0.875rem; color: #6b7280; }
+    </style>
+
+    <div class="about-container">
+        <h1>About Our Service</h1>
+        <p class="tagline">Connecting you with expert technicians, right when you need them.</p>
+
+        <div class="section">
+            <h2>Our Mission</h2>
+            <p>Our mission is to simplify the process of finding reliable and skilled electronic repair services. We aim to bridge the gap between customers facing technical difficulties and the professional technicians who can solve them, ensuring a seamless, transparent, and efficient experience for everyone involved.</p>
+        </div>
+
+        <div class="section">
+            <h2>Our Vision</h2>
+            <p>We envision a world where getting your electronics fixed is as easy as a few clicks. By leveraging technology, we strive to create the most trusted platform for on-demand technical support, empowering local technicians and providing peace of mind to customers across the region.</p>
+        </div>
+
+        <div class="section">
+            <h2>Meet the Team</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <img src="/assets/images/placeholder.png" alt="Team Member 1">
+                    <h3>Poch Srey</h3>
+                    <p>Founder & CEO</p>
+                </div>
+                <div class="team-member">
+                    <img src="/assets/images/placeholder.png" alt="Team Member 2">
+                    <h3>Jane Doe</h3>
+                    <p>Lead Developer</p>
+                </div>
+                <div class="team-member">
+                    <img src="/assets/images/placeholder.png" alt="Team Member 3">
+                    <h3>John Smith</h3>
+                    <p>Head of Operations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
   <script src="utils/main.js"></script>
 </body>

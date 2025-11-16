@@ -1,11 +1,20 @@
+<?php
+require_once '../config/check_login.php';
+
+$message = null;
+if (isset($_SESSION['contact_message'])) {
+    $message = $_SESSION['contact_message'];
+    unset($_SESSION['contact_message']);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="utils/main.css">
-
-  <title>Document</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <title>Contact Us</title>
 </head>
 <body>
 
@@ -82,41 +91,103 @@
 <div id="sidebar-container"></div>
 
 
-  <div class="main-content">
-    <h1>Welcome!</h1>
-    <p>This is your page content.</p>
-    aldfja; 
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-  </div>
+<div class="main-content">
+    <style>
+        .contact-wrapper { max-width: 1100px; margin: 2rem auto; background-color: #fff; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: grid; grid-template-columns: 1fr; }
+        @media (min-width: 1024px) { .contact-wrapper { grid-template-columns: 1fr 1fr; } }
+        
+        .contact-info { padding: 2.5rem; background-color: #f9fafb; border-top-left-radius: 0.5rem; border-bottom-left-radius: 0.5rem; }
+        .contact-info h1 { font-size: 2rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem; }
+        .contact-info p { font-size: 1rem; color: #4b5563; margin-bottom: 2rem; }
+        .info-item { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .info-item .icon { color: #3b82f6; }
+        .info-item span { font-size: 0.95rem; color: #374151; }
+        #contact-map { height: 250px; width: 100%; border-radius: 0.5rem; margin-top: 2rem; border: 1px solid #e5e7eb; }
+
+        .contact-form { padding: 2.5rem; }
+        .contact-form h2 { font-size: 1.75rem; font-weight: 600; color: #111827; margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151; }
+        .form-group input, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; transition: all 0.2s; }
+        .form-group input:focus, .form-group textarea:focus { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; outline: none; }
+        .btn-submit { display: inline-block; background-color: #3b82f6; color: white; padding: 0.75rem 2rem; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; width: 100%; }
+        .btn-submit:hover { background-color: #2563eb; }
+        .message { padding: 1rem; margin-bottom: 1.5rem; border-radius: 0.5rem; font-weight: 500; }
+        .message.success { background-color: #d1fae5; color: #065f46; }
+        .message.error { background-color: #fee2e2; color: #991b1b; }
+    </style>
+
+    <div class="contact-wrapper">
+        <div class="contact-info">
+            <h1>Get in Touch</h1>
+            <p>We're here to help and answer any question you might have. We look forward to hearing from you.</p>
+            
+            <div class="info-item">
+                <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/></svg></div>
+                <span>#123, Street 456, Phnom Penh, Cambodia</span>
+            </div>
+            <div class="info-item">
+                <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414zM0 4.697v7.104l5.803-3.558zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586zm.239-.03-1.588-1.588L0 11.803V4.697zM16 4.697v7.104l-5.803-3.558L16 4.697z"/></svg></div>
+                <span>contact@electronicservice.com</span>
+            </div>
+            <div class="info-item">
+                <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M1.885.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/></svg></div>
+                <span>(+855) 12 345 678</span>
+            </div>
+
+            <div id="contact-map"></div>
+        </div>
+
+        <div class="contact-form">
+            <h2>Send us a Message</h2>
+
+            <?php if ($message): ?>
+                <div class="message <?= htmlspecialchars($message['type']) ?>">
+                    <?= htmlspecialchars($message['text']) ?>
+                </div>
+            <?php endif; ?>
+
+            <form action="submit_contact.php" method="POST">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Send Message</button>
+            </form>
+        </div>
+    </div>
+</div>
 
   <script src="utils/main.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Default location: Phnom Penh
+        const lat = 11.5564;
+        const lng = 104.9282;
+
+        const map = L.map('contact-map').setView([lat, lng], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.marker([lat, lng]).addTo(map)
+            .bindPopup('Our Office Location')
+            .openPopup();
+    });
+  </script>
 </body>
 </html>
