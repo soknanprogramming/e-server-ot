@@ -1,10 +1,97 @@
+<?php
+require_once '../config/check_login.php';
+require_once '../repos/Users.php';
+require_once '../repos/UserProfile.php';
+
+$userRepo = new Users();
+$profileRepo = new UserProfile();
+$message = null;
+
+// Handle profile update
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $userId = $_SESSION['user_id'];
+    $imageUploadPath = null;
+
+    // Handle image upload
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/../assets/images/profiles/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (in_array($_FILES['profile_image']['type'], $allowedTypes)) {
+            // Delete old image if it exists
+            $oldUser = $profileRepo->getProfileByUserId($userId);
+            if (!empty($oldUser['ImageURL'])) {
+                $oldImagePath = $uploadDir . $oldUser['ImageURL'];
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+
+            $fileName = uniqid() . '-' . basename($_FILES['profile_image']['name']);
+            $targetPath = $uploadDir . $fileName;
+
+            if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $targetPath)) {
+                $imageUploadPath = $fileName;
+            } else {
+                $message = ['type' => 'error', 'text' => 'Failed to move uploaded file.'];
+            }
+        } else {
+            $message = ['type' => 'error', 'text' => 'Invalid file type. Only JPG, PNG, and GIF are allowed.'];
+        }
+    }
+
+    $user_gmail = trim($_POST['user_gmail'] ?? '');
+
+    if (empty($user_gmail)) {
+        $message = ['type' => 'error', 'text' => 'Primary email cannot be empty.'];
+    } elseif (!filter_var($user_gmail, FILTER_VALIDATE_EMAIL)) {
+        $message = ['type' => 'error', 'text' => 'Invalid email format.'];
+    } elseif ($userRepo->isEmailTakenByOtherUser($user_gmail, $userId)) {
+        $message = ['type' => 'error', 'text' => 'Primary email is already in use by another account.'];
+    } else {
+        // Username is not updated, only the email
+        $userUpdateResult = $userRepo->updateUserEmail($userId, $user_gmail);
+
+        $profileData = [
+            'gmail' => trim($_POST['profile_gmail'] ?? null),
+            'phone' => trim($_POST['phone'] ?? null),
+            'phone2' => trim($_POST['phone2'] ?? null),
+            'location' => trim($_POST['location'] ?? null),
+            'sexId' => !empty($_POST['sexId']) ? $_POST['sexId'] : null,
+            'Bio' => trim($_POST['Bio'] ?? null)
+        ];
+
+        if ($imageUploadPath) {
+            $profileData['ImageURL'] = $imageUploadPath;
+        }
+
+        $profileUpdateResult = $profileRepo->upsertProfile($userId, array_filter($profileData, fn($value) => $value !== null));
+
+        if ($userUpdateResult === true && $profileUpdateResult) {
+            $message = ['type' => 'success', 'text' => 'Profile updated successfully!'];
+        } elseif ($userUpdateResult !== true) {
+            $message = ['type' => 'error', 'text' => $userUpdateResult];
+        } else {
+            $message = ['type' => 'error', 'text' => 'An error occurred while updating your profile details.'];
+        }
+    }
+}
+
+$user = $profileRepo->getProfileByUserId($_SESSION['user_id']);
+
+// For sex dropdown
+$sexStmt = $userRepo->getDb()->query("SELECT id, name FROM sex");
+$sexOptions = $sexStmt->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="utils/main.css">
-
   <title>Document</title>
 </head>
 <body>
@@ -83,38 +170,95 @@
 
 
   <div class="main-content">
-    <h1>Welcome!</h1>
-    <p>This is your page content.</p>
-    aldfja; 
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
-    dalkfj</br>
+    <style>
+        .profile-container { max-width: 600px; margin: 2rem auto; padding: 2rem; background-color: white; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .profile-container h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: #374151; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; }
+        .profile-image-container { text-align: center; margin-bottom: 1.5rem; }
+        .profile-image { width: 128px; height: 128px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input[type="file"] {
+            padding: 0;
+            border: none;
+        }
+        .form-group input:disabled { background-color: #f3f4f6; cursor: not-allowed; }
+        .btn-submit { display: inline-block; background-color: #3b82f6; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.375rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+        .btn-submit:hover { background-color: #2563eb; }
+        .message { padding: 1rem; margin-bottom: 1.5rem; border-radius: 0.5rem; font-weight: 500; }
+        .message.success { background-color: #d1fae5; color: #065f46; }
+        .message.error { background-color: #fee2e2; color: #991b1b; }
+    </style>
+
+    <div class="profile-container">
+        <h1>My Profile</h1>
+
+        <?php if ($message): ?>
+            <div class="message <?= htmlspecialchars($message['type']) ?>">
+                <?= htmlspecialchars($message['text']) ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($user): ?>
+            <div class="profile-image-container">
+                <img src="<?= isset($user['ImageURL']) && $user['ImageURL'] ? '../assets/images/profiles/' . htmlspecialchars($user['ImageURL']) : '../assets/images/placeholder.png' ?>" 
+                     alt="Profile Picture" class="profile-image">
+            </div>
+
+            <form action="profile.php" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="profile_image">Change Profile Picture</label>
+                    <input type="file" id="profile_image" name="profile_image" accept="image/png, image/jpeg, image/gif">
+                </div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="<?= htmlspecialchars($user['username'] ?? '') ?>" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="user_gmail">Primary Email</label>
+                    <input type="email" id="user_gmail" name="user_gmail" value="<?= htmlspecialchars($user['user_gmail'] ?? '') ?>" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile_gmail">Secondary Email</label>
+                    <input type="email" id="profile_gmail" name="profile_gmail" value="<?= htmlspecialchars($user['profile_gmail'] ?? '') ?>">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="text" id="phone" name="phone" value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
+                </div>
+                <div class="form-group">
+                    <label for="phone2">Secondary Phone</label>
+                    <input type="text" id="phone2" name="phone2" value="<?= htmlspecialchars($user['phone2'] ?? '') ?>">
+                </div>
+                <div class="form-group">
+                    <label for="sexId">Sex</label>
+                    <select id="sexId" name="sexId">
+                        <option value="">-- Select --</option>
+                        <?php foreach ($sexOptions as $sex): ?>
+                            <option value="<?= $sex['id'] ?>" <?= (isset($user['sexId']) && $user['sexId'] == $sex['id']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($sex['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" value="<?= htmlspecialchars($user['location'] ?? '') ?>">
+                </div>
+                <div class="form-group">
+                    <label for="Bio">Bio</label>
+                    <textarea id="Bio" name="Bio" rows="4"><?= htmlspecialchars($user['Bio'] ?? '') ?></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="created_at">Member Since</label>
+                    <input type="text" id="created_at" value="<?= isset($user['created_at']) ? date('d M Y', strtotime($user['created_at'])) : '' ?>" disabled>
+                </div>
+                <button type="submit" class="btn-submit">Save Changes</button>
+            </form>
+        <?php else: ?>
+            <p>Could not load user profile.</p>
+        <?php endif; ?>
+    </div>
   </div>
 
   <script src="utils/main.js"></script>

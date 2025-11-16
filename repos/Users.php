@@ -43,4 +43,34 @@ class Users {
         $stmt = $this->pdo->query("SELECT id, username FROM users");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getDb() {
+        return $this->pdo;
+    }
+
+    public function getUserById($userId) {
+        $stmt = $this->pdo->prepare("SELECT id, username, gmail, created_at FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function isEmailTakenByOtherUser($gmail, $userId) {
+        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE gmail = :gmail AND id != :userId");
+        $stmt->execute(['gmail' => $gmail, 'userId' => $userId]);
+        if ($stmt->fetch()) {
+            return true;
+        }
+        return false;
+    }
+
+    public function updateUserEmail($userId, $user_gmail) {
+        $stmt = $this->pdo->prepare("UPDATE users SET gmail = :user_gmail WHERE id = :userId");
+        if ($stmt->execute([
+            'user_gmail' => $user_gmail,
+            'userId' => $userId
+        ])) {
+            return true;
+        }
+        return "An error occurred while updating your email.";
+    }
 }
