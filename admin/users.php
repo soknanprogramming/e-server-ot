@@ -74,11 +74,11 @@ $users = $usersRepo->getUsersForAdmin();
                         <th>Gmail</th>
                         <th>Role</th>
                         <th>Joined Date</th>
-                    </tr>
+                        <th>Actions</th> </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($users)): ?>
-                        <tr><td colspan="5" style="text-align:center;">No users found.</td></tr>
+                        <tr><td colspan="6" style="text-align:center;">No users found.</td></tr>
                     <?php else: ?>
                         <?php foreach ($users as $user): ?>
                             <tr>
@@ -93,6 +93,33 @@ $users = $usersRepo->getUsersForAdmin();
                                     <?php endif; ?>
                                 </td>
                                 <td><?= date('d M Y', strtotime($user['created_at'])) ?></td>
+                                <td>
+                                    <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                                        
+                                        <?php if ($user['isAdmin']): ?>
+                                            <a href="services/update_role.php?id=<?= $user['id'] ?>&role=0" 
+                                               onclick="return confirm('Demote this admin to a regular user?')"
+                                               style="color: #d97706; text-decoration: underline; margin-right: 10px; font-size: 0.9rem;">
+                                               Remove Admin
+                                            </a>
+                                        <?php else: ?>
+                                            <a href="services/update_role.php?id=<?= $user['id'] ?>&role=1" 
+                                               onclick="return confirm('Make this user an Admin?')"
+                                               style="color: #2563eb; font-weight: bold; text-decoration: underline; margin-right: 10px; font-size: 0.9rem;">
+                                               Make Admin
+                                            </a>
+                                        <?php endif; ?>
+
+                                        <a href="services/delete_user.php?id=<?= $user['id'] ?>" 
+                                           onclick="return confirm('Are you sure you want to permanently delete this user? This cannot be undone.')"
+                                           style="color: #dc2626; text-decoration: none; font-size: 0.9rem;">
+                                           Delete
+                                        </a>
+
+                                    <?php else: ?>
+                                        <span style="color: #9ca3af; font-style: italic;">(You)</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

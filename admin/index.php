@@ -157,12 +157,12 @@ foreach ($allOrders as $order) {
                                 </td>
                                 <td>
                                     <?php if ($order['IsHelp']): ?>
-                                        <a href="update_status.php?id=<?= $order['id'] ?>&status=0" style="color: #d97706; text-decoration: underline; margin-right: 10px;">Mark Pending</a>
+                                        <a href="services/update_status.php?id=<?= $order['id'] ?>&status=0" style="color: #d97706; text-decoration: underline; margin-right: 10px;">Mark Pending</a>
                                     <?php else: ?>
-                                        <a href="update_status.php?id=<?= $order['id'] ?>&status=1" style="color: #059669; font-weight: bold; text-decoration: underline; margin-right: 10px;">Mark Done</a>
+                                        <a href="services/update_status.php?id=<?= $order['id'] ?>&status=1" style="color: #059669; font-weight: bold; text-decoration: underline; margin-right: 10px;">Mark Done</a>
                                     <?php endif; ?>
                                     
-                                    <a href="delete_order.php?id=<?= $order['id'] ?>" 
+                                    <a href="services/delete_order.php?id=<?= $order['id'] ?>" 
                                     onclick="return confirm('Are you sure you want to delete this order?');" 
                                     style="color: #dc2626; text-decoration: none;">
                                     Delete

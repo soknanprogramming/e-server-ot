@@ -80,4 +80,39 @@ class Users {
         }
         return "An error occurred while updating your email.";
     }
+
+    // Add these methods to repos/Users.php
+
+    public function updateUserRole($userId, $isAdmin) {
+        $stmt = $this->pdo->prepare("UPDATE users SET isAdmin = :isAdmin WHERE id = :id");
+        return $stmt->execute([
+            'isAdmin' => $isAdmin, // 1 or 0
+            'id' => $userId
+        ]);
+    }
+
+    public function deleteUser($userId) {
+        $this->pdo->beginTransaction();
+        try {
+            // Optional: Delete related data first (like profile, orders) to avoid foreign key errors
+            // For now, we'll just try to delete the user. 
+            // If you have foreign keys set to CASCADE in your SQL, this works automatically.
+            // Otherwise, you might need to delete from user_profile and orders first.
+            
+            $stmt = $this->pdo->prepare("DELETE FROM user_profile WHERE user_id = ?");
+            $stmt->execute([$userId]);
+
+            $stmt = $this->pdo->prepare("DELETE FROM orders WHERE userId = ?");
+            $stmt->execute([$userId]);
+
+            $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+
+            $this->pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            return false;
+        }
+    }
 }
