@@ -143,4 +143,43 @@ class Orders {
             return false;
         }
     }
+
+    // Add this method to your Orders class in repos/Orders.php
+    public function getAllOrdersDetailed() {
+        $stmt = $this->pdo->query("
+            SELECT 
+                o.id, 
+                o.Username, 
+                o.PhoneNumber, 
+                o.Problem, 
+                o.created_at, 
+                o.IsHelp,
+                cp.name AS problem_name,
+                co.name AS category_name,
+                p.name AS province,
+                d.name AS district,
+                c.name AS commune,
+                v.name AS village,
+                i.image1
+            FROM orders o
+            JOIN categories_problem cp ON o.categories_problemId = cp.id
+            JOIN categories_order co ON cp.categories_orderId = co.id
+            LEFT JOIN provinces p ON o.province_id = p.id
+            LEFT JOIN districts d ON o.district_id = d.id
+            LEFT JOIN communes c ON o.commune_id = c.id
+            LEFT JOIN villages v ON o.villages_id = v.id
+            LEFT JOIN image i ON o.imageId = i.id
+            ORDER BY o.created_at DESC
+        ");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Add to repos/Orders.php
+    public function updateOrderStatus($orderId, $isHelp) {
+        $stmt = $this->pdo->prepare("UPDATE orders SET IsHelp = :isHelp WHERE id = :id");
+        return $stmt->execute([
+            'isHelp' => $isHelp,
+            'id' => $orderId
+        ]);
+    }
 }
