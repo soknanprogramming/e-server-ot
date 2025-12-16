@@ -182,4 +182,31 @@ class Orders {
             'id' => $orderId
         ]);
     }
+
+    // Add this to repos/Orders.php
+    public function deleteOrderAsAdmin($orderId) {
+        $this->pdo->beginTransaction();
+        try {
+            // Get imageId first so we can delete the image record too
+            $stmt = $this->pdo->prepare("SELECT imageId FROM orders WHERE id = ?");
+            $stmt->execute([$orderId]);
+            $order = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Delete the order
+            $stmt = $this->pdo->prepare("DELETE FROM orders WHERE id = ?");
+            $stmt->execute([$orderId]);
+
+            // Delete associated image record if it exists
+            if ($order && $order['imageId']) {
+                $stmt = $this->pdo->prepare("DELETE FROM image WHERE id = ?");
+                $stmt->execute([$order['imageId']]);
+            }
+
+            $this->pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            return false;
+        }
+    }
 }

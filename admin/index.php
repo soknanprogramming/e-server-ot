@@ -123,7 +123,9 @@ foreach ($allOrders as $order) {
                         <th>Service / Problem</th>
                         <th>Date</th>
                         <th>Status</th>
-                        <th>Actions</th> </tr>
+                        <th>Actions</th>
+                        <th>Detail</th>
+                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($allOrders)): ?>
@@ -152,10 +154,21 @@ foreach ($allOrders as $order) {
                                 </td>
                                 <td>
                                     <?php if ($order['IsHelp']): ?>
-                                        <a href="update_status.php?id=<?= $order['id'] ?>&status=0" style="color: #d97706; text-decoration: underline; font-size: 0.9rem;">Mark Pending</a>
+                                        <a href="update_status.php?id=<?= $order['id'] ?>&status=0" style="color: #d97706; text-decoration: underline; margin-right: 10px;">Mark Pending</a>
                                     <?php else: ?>
-                                        <a href="update_status.php?id=<?= $order['id'] ?>&status=1" style="color: #059669; font-weight: bold; text-decoration: underline; font-size: 0.9rem;">Mark Done</a>
+                                        <a href="update_status.php?id=<?= $order['id'] ?>&status=1" style="color: #059669; font-weight: bold; text-decoration: underline; margin-right: 10px;">Mark Done</a>
                                     <?php endif; ?>
+                                    
+                                    <a href="delete_order.php?id=<?= $order['id'] ?>" 
+                                    onclick="return confirm('Are you sure you want to delete this order?');" 
+                                    style="color: #dc2626; text-decoration: none;">
+                                    Delete
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="order_detail.php?id=<?= $order['id'] ?>" style="font-weight: bold; color: #2563eb; text-decoration: none;">
+                                        #<?= $order['id'] ?>
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
