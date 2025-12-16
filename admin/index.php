@@ -87,7 +87,10 @@ foreach ($allOrders as $order) {
     <aside class="sidebar">
         <div class="brand">E-Server Admin</div>
         <ul class="nav">
-            <li class="nav-item"><a href="#" class="active">Dashboard</a></li>
+            <li class="nav-item"><a href="/admin/index.php" class="active">Dashboard</a></li>
+            
+            <li class="nav-item"><a href="/admin/users.php">Users</a></li>
+            
             <li class="nav-item"><a href="/auth/logout.php">Logout</a></li>
         </ul>
     </aside>

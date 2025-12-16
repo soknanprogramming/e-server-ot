@@ -39,8 +39,15 @@ class Users {
         return "An error occurred during signup.";
     }
 
+    // public function getUsersForAdmin() {
+    //     $stmt = $this->pdo->query("SELECT id, username FROM users");
+    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // }
+
+    // In repos/Users.php
     public function getUsersForAdmin() {
-        $stmt = $this->pdo->query("SELECT id, username FROM users");
+        // Select all important fields
+        $stmt = $this->pdo->query("SELECT id, username, gmail, isAdmin, created_at FROM users ORDER BY created_at DESC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
